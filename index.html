@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f1e9">
+  <meta name="description" content="تجوّل في زهي: مقهى، بار قهوة، ومساحة للتصميم. نسخة مستقلة من تجربة ريشيو.">
+  <title>زهي | ZHI Coffee</title>
+  <link rel="icon" href="assets/logo.webp" type="image/webp">
+  <link rel="preload" as="font" href="assets/fonts/alexandria-variable.ttf" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="catalog.js"></script>
+  <script defer src="flow-core.js"></script>
+  <script type="module" src="main.js"></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="bag" viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M8.5 9V6a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="left" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+    <symbol id="right" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="diagonal" viewBox="0 0 24 24"><path d="M17 7 7 17M7 8v9h9"/></symbol>
+    <symbol id="cube" viewBox="0 0 24 24"><path d="m12 2 8.7 5v10l-8.7 5-8.7-5V7L12 2Z"/><path d="m3.3 7 8.7 5 8.7-5M12 12v10"/></symbol>
+    <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.4 7M4 5v5h5"/></symbol>
+    <symbol id="expand" viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></symbol>
+    <symbol id="search-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.8"/><path d="m15 15 4.5 4.5"/></symbol>
+  </svg>
+  <a class="skip" href="#menu">انتقل إلى القائمة</a>
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <a class="brand" href="#home" aria-label="زهي، الرئيسية"><img id="brand-logo" src="assets/logo.webp" width="560" height="198" alt=""></a>
+      <nav aria-label="التنقل الرئيسي">
+        <a href="#home" aria-current="location">الجولة</a>
+        <a href="#menu">القائمة</a>
+        <a href="#story">الهوية</a>
+        <a href="#visit">الجلسات</a>
+        <a class="nav-store" href="https://zhi-coffee.com/">المتجر <svg class="icon"><use href="#diagonal"/></svg></a>
+      </nav>
+      <button class="bag-button" id="cart-open" type="button" aria-haspopup="dialog"><svg class="icon"><use href="#bag"/></svg><span>السلة</span><b id="bag-count" dir="ltr">0</b></button>
+    </div>
+  </header>
+  <main id="home">
+    <section class="wrap experience" aria-labelledby="hero-title">
+      <div class="intro">
+        <div class="intro-copy">
+          <p class="eyebrow"><i></i> زهي <span class="eyebrow-divider"></span> القهوة والمكان</p>
+          <h1 id="hero-title">خذ لك جولة<span>.</span></h1>
+          <p>اكتشف المكان من كل زاوية</p>
+        </div>
+        <div class="edition" dir="ltr" lang="en" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17"/><ellipse cx="24" cy="24" rx="7.5" ry="17"/><path d="M7 24h34M10 16h28M10 32h28M24 2v44M2 24h44"/></svg>
+          <div><b>THE ZHI INTERIOR</b><span>SPATIAL EDITION <em>001</em></span></div>
+        </div>
+      </div>
+      <div class="tour" id="tour">
+        <div class="stage" id="stage" data-station="0">
+          <div class="stage-photos" id="stage-photos">
+            <img class="stage-poster" id="poster" data-photo="0" src="assets/tour-car.webp" fetchpriority="high" width="1600" height="800" alt="بورش زيتية على منصة خشبية داخل مقهى زهي">
+          </div>
+          <div class="scene" id="scene" aria-hidden="true"></div>
+          <div class="stage-shade" aria-hidden="true"></div>
+          <div class="stage-top">
+            <span class="scene-badge" dir="ltr" lang="en"><i></i> <span id="mode-label">PHOTO TOUR</span></span>
+            <span class="scene-coordinate" dir="ltr" lang="en"><span id="scene-number">01</span> / 04</span>
+          </div>
+          <div class="markers" aria-label="محطات الجولة">
+            <button type="button" class="marker" data-stop="0" aria-label="السيارة" aria-pressed="true">01</button>
+            <button type="button" class="marker" data-stop="1" aria-label="بار القهوة" aria-pressed="false">02</button>
+            <button type="button" class="marker" data-stop="2" aria-label="الجلسات" aria-pressed="false">03</button>
+            <button type="button" class="marker" data-stop="3" aria-label="الواجهة الخارجية" aria-pressed="false">04</button>
+          </div>
+          <div class="stage-bottom">
+            <div class="stage-caption" aria-live="polite"><span lang="en" dir="ltr" id="stop-en">01 / THE DISPLAY</span><h2 id="stop-title">البورش الزيتية</h2><p id="stop-copy" hidden></p></div>
+            <div class="viewer-actions">
+              <button id="toggle-scene" type="button" class="tour-action"><svg class="icon"><use href="#cube"/></svg><span>ابدأ الجولة</span></button>
+              <div class="scene-tools" id="scene-tools" hidden>
+                <button type="button" id="zoom-in" aria-label="قرّب المشهد"><svg class="icon"><use href="#plus"/></svg></button>
+                <button type="button" id="zoom-out" aria-label="بعّد المشهد"><svg class="icon"><use href="#minus"/></svg></button>
+                <button type="button" id="reset-scene" aria-label="أعد زاوية الكاميرا"><svg class="icon"><use href="#reset"/></svg></button>
+              </div>
+              <button class="expand-button" type="button" id="fullscreen" aria-label="تكبير الجولة إلى ملء الشاشة"><svg class="icon"><use href="#expand"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="tour-rail">
+          <div class="rail-label" lang="en" dir="ltr">THE TOUR <span> / </span> 04</div>
+          <div class="tour-stops" aria-label="اختر محطة">
+            <button type="button" data-stop="0" aria-pressed="true"><b>01</b><span>السيارة</span></button>
+            <button type="button" data-stop="1" aria-pressed="false"><b>02</b><span>بار القهوة</span></button>
+            <button type="button" data-stop="2" aria-pressed="false"><b>03</b><span>الجلسات</span></button>
+            <button type="button" data-stop="3" aria-pressed="false"><b>04</b><span>الواجهة</span></button>
+          </div>
+          <div class="rail-arrows" dir="ltr">
+            <button type="button" id="prev-stop" aria-label="المحطة السابقة"><svg class="icon"><use href="#left"/></svg></button>
+            <button type="button" id="next-stop" aria-label="المحطة التالية"><svg class="icon"><use href="#right"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="tour-meta"><p id="tour-hint" role="status">اختر محطة أو استخدم الأسهم لتصفّح الصور.</p><span lang="en" dir="ltr">ZHI COFFEE HOUSE <b>—</b> STUDY NO. 01</span></div>
+    </section>
+    <section class="wrap section menu" id="menu" aria-labelledby="menu-title">
+      <div class="section-head">
+        <div><p class="eyebrow"><i></i> من البار</p><h2 id="menu-title">وش تشرب؟</h2><p>قائمة للمعاينة، مبنية على اختيارات ريشيو.</p></div>
+        <label class="search"><svg class="icon"><use href="#search-icon"/></svg><span class="sr-only">ابحث في القائمة</span><input id="search" type="search" autocomplete="off" placeholder="ابحث في القائمة"></label>
+      </div>
+      <div id="filters" class="filters" aria-label="أقسام القائمة"></div>
+      <div id="products" class="products"></div>
+      <p class="empty" id="empty-menu" role="status" hidden>ما لقينا نتيجة. جرّب كلمة أو قسم ثاني.</p>
+    </section>
+    <section class="story section" id="story" aria-labelledby="story-title">
+      <div class="wrap story-inner">
+        <div class="story-copy"><p class="eyebrow"><i></i> دفتر المواد <span class="eyebrow-divider"></span> 01</p><h2 id="story-title">هوية تُلمس.</h2><p>زيتوني عميق، خشب جوز، وعروق رخام خضراء. وعلى القماش، توقيع زهي كما ظهر في الصور المرجعية.</p><a class="quiet-link" href="#home">ارجع للجولة <svg class="icon"><use href="#diagonal"/></svg></a></div>
+        <figure class="story-mark"><img src="assets/signature.webp" loading="lazy" width="820" height="770" alt="توقيع Zhi المطرز على قماش كرسي عاجي"><figcaption><span dir="ltr" lang="en">01 / SIGNATURE</span> التوقيع المطرّز</figcaption></figure>
+        <figure class="story-linen"><img src="assets/linen.webp" loading="lazy" width="820" height="544" alt="شعار ZHI العربي على القماش الزيتي"><figcaption><span dir="ltr" lang="en">02 / CANVAS</span> قماش الهوية</figcaption></figure>
+      </div>
+    </section>
+    <section class="wrap section visit" id="visit" aria-labelledby="visit-title">
+      <img src="assets/facade.webp" width="1308" height="736" loading="lazy" alt="واجهة زهي المرجعية ببلاط أخضر ونوافذ مستديرة وسيارة زيتونية أمام المدخل">
+      <div><p class="eyebrow"><i></i> عند الطاولة</p><h2 id="visit-title">لجلستك مكان.</h2><p>خذ نظرة على الجلسات في الجولة، أو جرّب اختيار موعد وطاولة.</p><div class="visit-actions"><button id="booking-open" class="solid-button" type="button">جرّب حجز جلسة <svg class="icon"><use href="#left"/></svg></button><button class="quiet-link" type="button" id="show-seating">شاهد الجلسات <svg class="icon"><use href="#diagonal"/></svg></button></div></div>
+    </section>
+  </main>
+  <section class="shop-section" aria-labelledby="shop-title">
+    <div class="wrap shop-inner">
+      <div><p class="eyebrow"><i></i> من زهي إلى بيتك</p><h2 id="shop-title">زهي <span dir="ltr">× 911</span></h2><p>من مجموعة 911 إلى أدوات الماتشا ومحاصيل القهوة. تصفّح الإصدارات في متجر زهي.</p><a class="solid-button" href="https://zhi-coffee.com/">تصفّح متجر زهي <svg class="icon"><use href="#diagonal"/></svg></a></div>
+      <img src="assets/packaging.webp" width="950" height="535" alt="تغليف زهي الزيتي وعدّة الماتشا في صندوق السيارة" loading="lazy">
+    </div>
+  </section>
+  <footer class="footer"><div class="wrap footer-inner">
+    <a href="#home" class="brand" aria-label="زهي، العودة للأعلى"><img src="assets/logo.webp" width="560" height="198" alt=""></a>
+    <p>تصوّر مستقل لتجربة زهي، مبني على تطبيق ريشيو.</p>
+    <div class="footer-links"><button id="activity-open" class="quiet-link" type="button">طلباتي وحجوزاتي</button></div>
+  </div></footer>
+  <dialog class="panel" id="product-dialog" aria-labelledby="product-title"><div id="product-detail"></div></dialog>
+  <dialog class="panel panel-side" id="cart-dialog" aria-labelledby="cart-title">
+    <div class="panel-head"><div><p class="eyebrow">ZHI / ORDER</p><h2 id="cart-title">سلتك</h2></div><button type="button" class="icon-button" data-close aria-label="إغلاق السلة"><svg class="icon"><use href="#close"/></svg></button></div>
+    <div id="cart-lines"></div>
+    <form id="checkout" class="checkout" hidden>
+      <label class="field">طريقة الاستلام<select id="service" name="mode"><option value="pickup">استلام من الفرع</option><option value="dinein">على الطاولة</option><option value="car">استلام بالسيارة</option></select></label>
+      <label class="field" id="order-table" hidden>الطاولة<select id="service-table" name="table"><option>01</option><option>02</option><option>03</option></select></label>
+      <div class="cart-total"><span>الإجمالي</span><strong id="cart-total"></strong></div>
+      <p class="small-note">طلب تجريبي محفوظ في هذا المتصفح فقط. لا يتم إرساله أو تحصيل أي مبلغ.</p>
+      <button type="submit" class="solid-button">تأكيد الطلب التجريبي <svg class="icon"><use href="#left"/></svg></button>
+    </form>
+  </dialog>
+  <dialog class="panel" id="booking-dialog" aria-labelledby="booking-title">
+    <div class="panel-head"><div><p class="eyebrow">ZHI / SEATING</p><h2 id="booking-title">اختر جلستك</h2></div><button type="button" class="icon-button" data-close aria-label="إغلاق الحجز"><svg class="icon"><use href="#close"/></svg></button></div>
+    <form id="booking-form" class="booking-form">
+      <p class="small-note">الحجز هنا للتجربة ولا يحجز طاولة فعلية.</p>
+      <div class="fields"><label class="field">التاريخ<input id="booking-date" name="date" type="date" required></label><label class="field">الوقت<input name="time" type="time" value="18:00" required></label></div>
+      <div class="fields"><label class="field">الضيوف<select name="party"><option value="1">ضيف واحد</option><option value="2" selected>ضيفان</option><option value="4">4 ضيوف</option><option value="6">6 ضيوف</option></select></label><label class="field">الجلسة<select name="zone"><option>الجلسات الداخلية</option><option>بار القهوة</option></select></label></div>
+      <button type="submit" class="solid-button">احفظ الحجز التجريبي <svg class="icon"><use href="#left"/></svg></button>
+    </form>
+  </dialog>
+  <dialog class="panel" id="activity-dialog" aria-labelledby="activity-title">
+    <div class="panel-head"><div><p class="eyebrow">ZHI / YOUR VISIT</p><h2 id="activity-title">زيارتك</h2></div><button type="button" class="icon-button" data-close aria-label="إغلاق السجل"><svg class="icon"><use href="#close"/></svg></button></div>
+    <div id="activity-body"></div>
+  </dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <noscript><p class="wrap empty">فعّل JavaScript لتجربة الجولة والقائمة.</p></noscript>
+</body>
+</html>
