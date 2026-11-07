@@ -37,16 +37,14 @@ test('opening film plays once, can be skipped, and can be replayed', async t => 
   const page = await pageFor(t, { viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   const opening = page.locator('#site-intro');
   await opening.waitFor();
-  assert.equal(await opening.locator('img').evaluate(img => img.naturalWidth), 960);
-  const firstSource = await opening.locator('img').getAttribute('src');
-  assert.match(firstSource, /^blob:/);
+  await page.waitForFunction(() => document.querySelector('#site-intro video').currentTime > 0);
+  assert.equal(await opening.locator('video').getAttribute('src'), 'assets/intro-carrera.mp4');
   await page.locator('#intro-skip').click();
   await opening.waitFor({ state: 'hidden' });
   await page.reload();
-  assert.equal(await opening.locator('img').getAttribute('src'), null);
+  assert.equal(await opening.locator('video').getAttribute('src'), null);
   await page.locator('#intro-replay').click();
   await opening.waitFor();
-  assert.notEqual(await opening.locator('img').getAttribute('src'), firstSource);
   await page.keyboard.press('Escape');
   await opening.waitFor({ state: 'hidden' });
 });
@@ -57,7 +55,7 @@ test('portrait opening finishes and returns access to the homepage', async t => 
   });
   const opening = page.locator('#site-intro');
   await opening.waitFor();
-  assert.equal(await opening.locator('img').evaluate(img => img.naturalWidth), 432);
+  assert.equal(await opening.locator('video').getAttribute('src'), 'assets/intro-carrera-portrait.mp4');
   await opening.waitFor({ state: 'hidden', timeout: 8500 });
   await page.locator('#next-stop').click();
   await page.locator('#poster[src$="tour-bar.webp"]').waitFor();
@@ -65,7 +63,7 @@ test('portrait opening finishes and returns access to the homepage', async t => 
 
 test('opens the branded 3D tour, moves the camera, and switches to the exterior', async t => {
   const page = await pageFor(t, { viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
-  assert.equal(await page.locator('#site-intro img').getAttribute('src'), null);
+  assert.equal(await page.locator('#site-intro video').getAttribute('src'), null);
   assert.match(await page.locator('#brand-logo').getAttribute('src'), /logo\.webp$/);
   await page.locator('#toggle-scene').click();
   await page.waitForSelector('#stage.is-live', { timeout: 15000 });
@@ -104,7 +102,7 @@ test('phone layout and photo stations work when WebGL is unavailable', async t =
 
 test('photo tour crossfades decoded station images and finishes on the latest selection', async t => {
   const page = await pageFor(t, { reducedMotion: 'no-preference' }, () => {
-    sessionStorage.setItem('zhi.opening-film.seen.v2', '1');
+    sessionStorage.setItem('zhi.opening-film.seen.v3', '1');
   });
   await page.locator('#next-stop').click();
   const bar = page.locator('#poster[src$="tour-bar.webp"]');
