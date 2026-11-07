@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('../dist/', import.meta.url);
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8'
+  '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.mp4': 'video/mp4', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8'
 };
-const resourcePath = /^(?:[a-z0-9-]+\/)*[a-zA-Z0-9-]+\.(?:html|js|css|webp|ttf|txt)$/;
+const resourcePath = /^(?:[a-z0-9-]+\/)*[a-zA-Z0-9-]+\.(?:html|js|css|webp|ttf|txt|mp4)$/;
 export function createPreviewServer() {
   return createServer(async (req, res) => {
     try {
@@ -18,6 +18,19 @@ export function createPreviewServer() {
       const resource = path === '/' ? 'index.html' : path.slice(1);
       if (!resourcePath.test(resource)) return res.writeHead(404).end();
       const data = await readFile(new URL(resource, root));
+      if (extname(resource) === '.mp4' && req.headers.range) {
+        const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
+        const start = range?.[1] ? Number(range[1]) : Math.max(0,data.length-Number(range?.[2]));
+        const end = range?.[1] && range[2] ? Math.min(Number(range[2]),data.length-1) : data.length-1;
+        if (!range || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end) {
+          return res.writeHead(416, { 'Content-Range': 'bytes */' + data.length }).end();
+        }
+        res.writeHead(206, {
+          'Content-Type': 'video/mp4', 'Accept-Ranges': 'bytes', 'Content-Length': end-start+1,
+          'Content-Range': 'bytes ' + start + '-' + end + '/' + data.length
+        });
+        return res.end(req.method === 'HEAD' ? undefined : data.subarray(start,end+1));
+      }
       res.writeHead(200, { 'Content-Type': types[extname(resource)], 'X-Content-Type-Options': 'nosniff' });
       res.end(req.method === 'HEAD' ? undefined : data);
     } catch {

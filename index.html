@@ -12,6 +12,7 @@
   <script defer src="catalog.js"></script>
   <script defer src="flow-core.js"></script>
   <script type="module" src="main.js"></script>
+  <script type="module" src="intro.js"></script>
 </head>
 <body>
   <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -130,7 +131,7 @@
   <footer class="footer"><div class="wrap footer-inner">
     <a href="#home" class="brand" aria-label="زهي، العودة للأعلى"><img src="assets/logo.webp" width="560" height="198" alt=""></a>
     <p>تصوّر مستقل لتجربة زهي، مبني على تطبيق ريشيو.</p>
-    <div class="footer-links"><button id="activity-open" class="quiet-link" type="button">طلباتي وحجوزاتي</button></div>
+    <div class="footer-links"><button id="activity-open" class="quiet-link" type="button">طلباتي وحجوزاتي</button><button id="intro-replay" class="quiet-link" type="button">شاهد الافتتاحية</button></div>
   </div></footer>
   <dialog class="panel" id="product-dialog" aria-labelledby="product-title"><div id="product-detail"></div></dialog>
   <dialog class="panel panel-side" id="cart-dialog" aria-labelledby="cart-title">
@@ -158,6 +159,15 @@
     <div id="activity-body"></div>
   </dialog>
   <div class="toast" id="toast" role="status"></div>
+  <dialog id="site-intro" class="entry-film" aria-label="افتتاحية زهي">
+    <video muted playsinline preload="none" aria-hidden="true"></video>
+    <div class="entry-film-controls">
+      <span class="entry-film-index" dir="ltr" lang="en">ZHI / OPENING FILM</span>
+      <button type="button" id="intro-skip" autofocus>تخطّي <svg class="icon" aria-hidden="true"><use href="#left"/></svg></button>
+    </div>
+    <div class="entry-film-progress" aria-hidden="true"></div>
+  </dialog>
+  <p id="intro-status" class="sr-only" role="status"></p>
   <noscript><p class="wrap empty">فعّل JavaScript لتجربة الجولة والقائمة.</p></noscript>
 </body>
 </html>

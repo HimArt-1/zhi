@@ -185,9 +185,16 @@ function closeBumper(group, end, material) {
   curvedFascia(group,end,points.map(p => new T.Vector2(p.x,p.y)),material,0,true);
 }
 
-function wheel(group, specification, side, mats) {
+function wheel(car, specification, side, mats) {
   const { z, track, width, radius, rotor } = specification;
   const axis = side * track / 2, outer = axis + side * width / 2;
+  const wheelPivot = new T.Group();
+  wheelPivot.position.set(axis, radius, z);
+  wheelPivot.userData.rollingRadius = radius;
+  const group = new T.Group();
+  group.position.copy(wheelPivot.position).negate();
+  wheelPivot.add(group);
+  car.add(wheelPivot);
   const profile = [
     [.242,-width*.43],[.265,-width*.49],[radius-.027,-width*.48],
     [radius-.008,-width*.38],[radius,-width*.23],[radius,width*.22],

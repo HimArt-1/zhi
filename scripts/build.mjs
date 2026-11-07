@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = join(root, 'dist');
-const entries = ['index.html', 'style.css', 'main.js', 'scene.js', 'carrera.js', 'catalog.js', 'flow-core.js'];
-const publicAsset = /^[a-z0-9-]+\.(?:webp|ttf|js|txt)$/;
+const entries = ['index.html', 'style.css', 'main.js', 'intro.js', 'scene.js', 'carrera.js', 'catalog.js', 'flow-core.js'];
+const publicAsset = /^[a-z0-9-]+\.(?:webp|ttf|js|txt|mp4)$/;
 
 async function copyAssets(relativeDirectory) {
   const directory = join(root, relativeDirectory);
