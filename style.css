@@ -113,14 +113,18 @@ button{border:0}
 .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
 .product{min-width:0;border-bottom:1px solid var(--line);padding-bottom:13px}
 .product-photo{padding:0;display:block;width:100%;overflow:hidden;background:var(--paper2)}
-.product-photo img{width:100%;height:auto;aspect-ratio:1.22;transition:transform .4s var(--ease)}
+.product-photo img{width:100%;height:auto;aspect-ratio:3/4;transition:transform .4s var(--ease)}
 .product-photo:hover img{transform:scale(1.045)}
 .product p{font-size:10px;color:var(--muted);margin-top:9px}
 .product h3{font-size:14px;font-weight:550;line-height:1.55}
 .product-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:8px}
 .product-foot strong{font-size:12px;font-weight:560}
-.product-foot button,.icon-button{background:transparent;border:1px solid var(--line);width:40px;height:40px;display:grid;place-items:center}
-.product-foot button:hover,.icon-button:hover{background:var(--paper2)}
+.product .crop-notes{margin-top:4px;line-height:1.6}
+.product-store-link{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:2px 7px;font-size:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.product-store-link:hover{color:var(--olive);border-color:var(--olive)}
+.product-store-link .icon{width:13px;height:13px}
+.icon-button{background:transparent;border:1px solid var(--line);width:40px;height:40px;display:grid;place-items:center}
+.icon-button:hover{background:var(--paper2)}
 .empty{padding:25px;border:1px dashed var(--line);color:var(--muted)}
 .story{background:#e8e5d8;padding-block:clamp(40px,6vw,88px)}
 .story-inner{display:grid;grid-template-columns:.92fr 1fr .85fr;align-items:center;gap:clamp(18px,3vw,44px)}
@@ -139,10 +143,12 @@ button{border:0}
 .shop-inner{grid-template-columns:1fr 1.45fr}
 .shop-section h2 span{display:inline-block;font:500 .93em/.9 Georgia,serif}
 .footer{border-top:1px solid var(--line)}
-.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:30px 0}
+.footer-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:22px;padding:30px 0}
 .footer p,.footer-links{font-size:11px;color:var(--muted)}
 .footer-links{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .footer-links a:hover{text-decoration:underline}
+.footer .intro-credit{flex-basis:100%;font-size:10px}
+.intro-credit a{text-decoration:underline;text-underline-offset:2px}
 .panel{border:1px solid var(--line);color:var(--ink);background:var(--paper);padding:clamp(17px,3.5vw,30px);width:min(100% - 28px,500px);max-height:calc(100dvh - 28px);overscroll-behavior:contain}
 .panel::backdrop{background:#29271da0}
 .panel-side{width:min(100%,460px);margin:0 auto 0 0;height:100%;max-height:100%;max-width:100%}
@@ -175,6 +181,7 @@ body:has(dialog[open]){overflow:hidden}
 .loyalty-pass strong{font-weight:650}
 .toast{position:fixed;bottom:18px;inset-inline:0;margin:auto;z-index:6;max-width:calc(100% - 28px);width:max-content;padding:10px 18px;color:var(--white);background:var(--olive-dark);font-size:12px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
 .toast.visible{opacity:1;transform:none}
+@media(min-width:1160px){.products{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:1050px){.wrap{width:calc(100% - 64px)}.products{grid-template-columns:repeat(3,minmax(0,1fr))}.stage{aspect-ratio:1.96}}
 @media(min-width:681px) and (max-height:820px){
   .stage-bottom{top:20px;align-items:flex-start}
@@ -199,7 +206,7 @@ body:has(dialog[open]){overflow:hidden}
 .rail-arrows button{width:34px;min-width:0}.rail-arrows button .icon{width:15px;height:15px}
 .tour-meta span{display:none}.tour-meta p{font-size:10px}
 .section,.shop-section{margin-top:55px}.section-head{align-items:start;flex-direction:column;gap:8px}.search{width:100%}.search input{width:100%}
-.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product h3{font-size:12px}.product-photo img{aspect-ratio:1.08}.product-foot button{width:37px;height:37px}
+.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product h3{font-size:12px}
 .story-inner{grid-template-columns:1fr 1fr;gap:14px}.story-copy{grid-column:1/-1}.story-linen{align-self:center}.story figcaption{flex-wrap:wrap}
 .visit,.shop-inner{grid-template-columns:1fr;gap:17px}.visit>img{max-height:280px}.shop-inner>img{max-height:280px}.footer-inner{flex-wrap:wrap;gap:10px 18px}
 }
@@ -216,13 +223,17 @@ body:has(dialog[open]){overflow:hidden}
   padding:0;
   overflow:hidden;
   border:0;
-  background:#10150f;
-  color:#f1e9d3;
+  background:transparent;
+  color:#2c3524;
 }
-.entry-film::backdrop {background:transparent}
+.entry-film::backdrop {
+  background:#f4f0e3ad;
+  backdrop-filter:blur(12px);
+}
+.entry-film.is-leaving::backdrop {animation:entry-film-backdrop-out .56s ease-out both}
 .entry-film[open] {animation:entry-film-in .28s ease-out both}
 .entry-film[open].is-leaving {animation:entry-film-out .56s cubic-bezier(.58,.06,.25,1) both}
-.entry-film video {position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.entry-film-art {position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .entry-film-controls {
   position:absolute;
   top:max(18px,env(safe-area-inset-top));
@@ -235,7 +246,7 @@ body:has(dialog[open]){overflow:hidden}
 .entry-film-index {
   font:500 10px/1.5 var(--mono);
   letter-spacing:.16em;
-  text-shadow:0 1px 12px #10150f;
+  text-shadow:0 1px 12px #f4f0e3;
 }
 .entry-film-controls button {
   display:inline-flex;
@@ -245,7 +256,7 @@ body:has(dialog[open]){overflow:hidden}
   padding:0 14px;
   border:1px solid #ece0bb7d;
   background:#171d15de;
-  color:inherit;
+  color:#f1e9d3;
   font-size:12px;
 }
 .entry-film-controls button:hover {background:#343d2e}
@@ -255,17 +266,20 @@ body:has(dialog[open]){overflow:hidden}
   position:absolute;
   inset:auto 0 0;
   height:2px;
-  background:#f5ebcf25;
+  background:#2c35242b;
 }
 .entry-film-progress::after {
   content:"";
   position:absolute;
   inset:0;
-  background:#ddd0a2;
-  transform:scaleX(var(--played,0));
+  background:#596449;
+  transform:scaleX(0);
   transform-origin:right;
-  transition:transform .24s linear;
 }
+.entry-film[open] .entry-film-progress::after {animation:entry-film-clock var(--opening-duration,4950ms) linear both}
+.entry-film.is-leaving .entry-film-progress::after {animation-play-state:paused}
+@keyframes entry-film-clock {to {transform:scaleX(1)}}
+@keyframes entry-film-backdrop-out {to {opacity:0}}
 @keyframes entry-film-in {from {opacity:0} to {opacity:1}}
 @keyframes entry-film-out {
   from {clip-path:inset(0);opacity:1}

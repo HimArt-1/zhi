@@ -1,3 +1,5 @@
+import { coffeeCrops } from './coffee-crops.js';
+
 const $ = id => document.getElementById(id);
 const stage = $('stage');
 const photos = $('stage-photos');
@@ -220,12 +222,10 @@ function write(key, value) { try { localStorage.setItem(key, JSON.stringify(valu
 const state = F.hydrate(read(orderStore));
 const savedBookings = read(bookingStore);
 const bookings = Array.isArray(savedBookings) ? savedBookings.filter(item => item && typeof item.date === 'string' && typeof item.time === 'string' && typeof item.zone === 'string' && Number.isInteger(item.party)) : [];
-const categoryNames = { all: 'الكل', espresso: 'قهوة وحليب', drip: 'قهوة مقطّرة', cold: 'مشروبات باردة', sweets: 'حلى', beans: 'محاصيل', boxes: 'بوكسات' };
+const origins = [...new Set(coffeeCrops.map(crop => crop.origin))];
 const modeNames = { pickup: 'استلام من الفرع', dinein: 'على الطاولة', car: 'استلام بالسيارة' };
 const orderLabels = { confirmed: 'مؤكد', preparing: 'قيد التحضير', ready: 'جاهز للاستلام', completed: 'مكتمل', cancelled: 'ملغى' };
-const priority = { 'esp-3': 0, 'drip-2': 1 };
-const products = [...F.catalog].sort((a, b) => (priority[a.id] ?? 2) - (priority[b.id] ?? 2));
-let category = 'all', toastTimer, detailReturn;
+let originFilter = '', toastTimer, detailReturn;
 const money = amount => new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(amount);
 function el(tag, label = '', cls) {
   const node = document.createElement(tag);
@@ -275,28 +275,38 @@ function productPhoto(p, size, className) {
 const normalize = str => str.toLowerCase().normalize('NFD').replace(/[\u064B-\u065F\u0670\u0640\u0300-\u036f]/g, '').replace(/ى/g, 'ي');
 function showMenu() {
   const query = normalize($('search').value.trim());
-  const list = products.filter(p => (category === 'all' || p.category === category) &&
-    normalize([p.name.ar, p.name.en, p.desc.ar, ...p.notes.ar].join(' ')).includes(query));
-  $('products').replaceChildren(...list.map(p => {
+  const list = coffeeCrops.filter(crop => (!originFilter || crop.origin === originFilter) &&
+    normalize([crop.name, crop.origin, crop.notes].join(' ')).includes(query));
+  $('products').replaceChildren(...list.map(crop => {
     const item = el('article', '', 'product');
-    item.dataset.product = p.id;
-    const photo = button('تفاصيل ' + p.name.ar, 'product-photo', () => showProduct(p));
-    photo.textContent = ''; photo.setAttribute('aria-label', 'تفاصيل ' + p.name.ar);
-    photo.append(productPhoto(p, 640));
+    item.dataset.product = crop.id;
+    const photo = el('a', '', 'product-photo');
+    photo.href = crop.url;
+    photo.setAttribute('aria-label', crop.name + ' في متجر زهي');
+    const image = el('img');
+    image.src = 'assets/zhi-crop-' + crop.id + '.webp';
+    image.alt = 'عبوة ' + crop.name + ' من زهي';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    photo.append(image);
+    const store = el('a', 'في المتجر', 'product-store-link');
+    store.href = crop.url;
+    store.append(icon('diagonal'));
     const foot = el('div', '', 'product-foot');
-    foot.append(el('strong', money(F.unitPrice(p.id))), button('اختر ' + p.name.ar, '', () => showProduct(p), 'plus'));
-    item.append(photo, el('p', categoryNames[p.category]), el('h3', p.name.ar), foot);
+    foot.append(el('strong', money(crop.price)), store);
+    item.append(photo, el('p', crop.origin + ' · ٢٥٠ جم'), el('h3', crop.name),
+      el('p', crop.notes, 'crop-notes'), foot);
     return item;
   }));
   $('empty-menu').hidden = Boolean(list.length);
 }
-for (const [key, label] of Object.entries(categoryNames)) {
-  const filter = button(label, '', () => {
-    category = key;
+for (const origin of ['', ...origins]) {
+  const filter = button(origin || 'كل المحاصيل', '', () => {
+    originFilter = origin;
     Array.from($('filters').children).forEach((child) => child.setAttribute('aria-pressed', String(child === filter)));
     showMenu();
   });
-  filter.setAttribute('aria-pressed', String(key === category));
+  filter.setAttribute('aria-pressed', String(origin === originFilter));
   $('filters').append(filter);
 }
 $('search').addEventListener('input', showMenu);

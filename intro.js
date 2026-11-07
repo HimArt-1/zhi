@@ -1,9 +1,10 @@
 const dialog = document.getElementById('site-intro');
-const video = dialog.querySelector('video');
+const artwork = dialog.querySelector('.entry-film-art');
 const replay = document.getElementById('intro-replay');
 const status = document.getElementById('intro-status');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const sessionKey = 'zhi.opening-film.seen.v1';
+const sessionKey = 'zhi.opening-film.seen.v2';
+const duration = 4950;
 let run;
 
 function seenOpening() {
@@ -20,69 +21,67 @@ function closeOpening(animate = true) {
   active.closing = true;
   active.events.abort();
   clearTimeout(active.deadline);
-  video.pause();
 
-  const cleanup = () => {
-    active.exit.abort();
+  function cleanup() {
+    dialog.removeEventListener('animationend', onExit);
     dialog.close();
     dialog.classList.remove('is-leaving');
-    dialog.style.removeProperty('--played');
-    video.removeAttribute('src');
-    video.load();
+    artwork.removeAttribute('src');
+    if (active.url) URL.revokeObjectURL(active.url);
     run = undefined;
-  };
+  }
+  function onExit(event) {
+    if (event.target !== dialog || event.animationName !== 'entry-film-out') return;
+    clearTimeout(active.deadline);
+    cleanup();
+  }
   if (!dialog.open || !animate || reducedMotion.matches) {
     cleanup();
     return;
   }
+  dialog.addEventListener('animationend', onExit);
   dialog.classList.add('is-leaving');
-  const timer = setTimeout(cleanup, 620);
-  dialog.addEventListener('animationend', () => {
-    clearTimeout(timer);
-    cleanup();
-  }, { once: true, signal: active.exit.signal });
+  active.deadline = setTimeout(cleanup, 620);
 }
 
-function playOpening(manual = false) {
+async function playOpening(manual = false) {
   if (run) return;
-  const events = new AbortController();
-  const active = { events, exit: new AbortController(), closing: false, deadline: undefined };
-  const signal = events.signal;
+  const active = { events: new AbortController(), closing: false, deadline: undefined, url: undefined };
+  const { signal } = active.events;
   run = active;
   status.textContent = '';
-  video.preload = 'auto';
-  video.muted = true;
-  video.defaultMuted = true;
 
   function unavailable() {
     if (manual) status.textContent = 'تعذّر تشغيل افتتاحية زهي.';
     closeOpening(false);
   }
-  function start() {
-    clearTimeout(active.deadline);
-    dialog.showModal();
-    try { sessionStorage.setItem(sessionKey, '1'); } catch { /* Playback is still available. */ }
-    active.deadline = setTimeout(() => closeOpening(), 9500);
-    video.play().catch(() => {
-      if (!signal.aborted) unavailable();
-    });
-  }
-
-  video.addEventListener('canplay', start, { once: true, signal });
-  video.addEventListener('error', unavailable, { once: true, signal });
-  video.addEventListener('ended', () => closeOpening(), { once: true, signal });
-  video.addEventListener('timeupdate', () => {
-    if (video.duration > 0) dialog.style.setProperty('--played', video.currentTime / video.duration);
-  }, { signal });
   if (!manual) {
     const cancelPending = () => { if (!dialog.open) closeOpening(false); };
     for (const event of ['pointerdown', 'keydown', 'scroll']) {
-      window.addEventListener(event, cancelPending, { capture:true, passive:true, signal });
+      window.addEventListener(event, cancelPending, { capture: true, passive: true, signal });
     }
   }
-  active.deadline = setTimeout(unavailable, manual ? 6000 : 2000);
-  video.src = matchMedia('(max-aspect-ratio: 4/5)').matches ? 'assets/intro-portrait.mp4' : 'assets/intro.mp4';
-  video.load();
+  active.deadline = setTimeout(unavailable, manual ? 6500 : 2500);
+  const file = matchMedia('(max-aspect-ratio: 4/5)').matches ? 'opening-car-portrait.webp' : 'opening-car.webp';
+  try {
+    const response = await fetch('assets/' + file, { signal });
+    if (!response.ok) throw new Error('Opening media unavailable');
+    const movie = await response.blob();
+    if (signal.aborted) return;
+    // A distinct object URL restarts the animation on replay without fetching a cache-busting URL.
+    active.url = URL.createObjectURL(movie);
+    artwork.src = active.url;
+    await artwork.decode();
+    if (signal.aborted) return;
+
+    clearTimeout(active.deadline);
+    dialog.style.setProperty('--opening-duration', duration + 'ms');
+    dialog.showModal();
+    try { sessionStorage.setItem(sessionKey, '1'); } catch { /* Playback is still available. */ }
+    active.deadline = setTimeout(() => closeOpening(), duration);
+  } catch {
+    if (!signal.aborted) unavailable();
+  }
 }
 
 document.getElementById('intro-skip').addEventListener('click', () => closeOpening());
@@ -90,10 +89,10 @@ dialog.addEventListener('cancel', event => {
   event.preventDefault();
   closeOpening();
 });
-replay.addEventListener('click', () => playOpening(true));
+replay.addEventListener('click', () => { void playOpening(true); });
 reducedMotion.addEventListener('change', event => {
   if (event.matches) closeOpening(false);
 });
 if (!seenOpening() && !reducedMotion.matches && (!location.hash || location.hash === '#home')) {
-  playOpening();
+  void playOpening();
 }

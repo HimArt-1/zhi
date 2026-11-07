@@ -2,33 +2,36 @@ import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { once } from 'node:events';
-import { spawn } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const root = new URL('../', import.meta.url);
-const stills = process.argv.includes('--stills');
-const framesPerSecond = 24;
-const formats = [
-  {name:'intro',width:1280,height:720},
-  {name:'intro-portrait',width:540,height:960}
+const run=promisify(execFile);
+const root=new URL('../',import.meta.url);
+const stills=process.argv.includes('--stills');
+const frameMs=50;
+const formats=[
+  {name:'opening-car',width:960,height:540},
+  {name:'opening-car-portrait',width:432,height:768}
 ];
-const sources = new Set([
-  'scripts/intro-film.js','carrera.js','vendor/three.js','vendor/rounded-box.js','assets/logo.webp'
+const sources=new Set([
+  'scripts/intro-film.js','scripts/gltf-loader.js','scripts/buffer-geometry-utils.js',
+  'scripts/intro-model.glb','vendor/three.js','assets/logo.webp'
 ]);
-const setup = `<!doctype html><meta charset="utf-8"><script type="module">
+const setup=`<!doctype html><meta charset="utf-8"><script type="module">
   import { createFilm } from '/scripts/intro-film.js';
   const {width,height}=Object.fromEntries(new URL(location.href).searchParams);
   const logo=new Image();
   logo.src='/assets/logo.webp';
   await logo.decode();
-  const film=createFilm(Number(width),Number(height),logo);
+  const film=await createFilm(Number(width),Number(height),logo);
   window.captureFrame=time=>film.frame(time);
   window.filmDuration=film.duration;
 </script>`;
-const server = createServer(async (request,response) => {
-  const url = new URL(request.url,'http://localhost');
-  if (url.pathname === '/') {
+const server=createServer(async (request,response) => {
+  const url=new URL(request.url,'http://localhost');
+  if (url.pathname==='/') {
     response.writeHead(200,{'content-type':'text/html; charset=utf-8'}).end(setup);
     return;
   }
@@ -39,8 +42,8 @@ const server = createServer(async (request,response) => {
   }
   try {
     const data=await readFile(new URL(path,root));
-    response.writeHead(200,{'content-type':path.endsWith('.webp')?'image/webp':'text/javascript'});
-    response.end(data);
+    const type=path.endsWith('.webp')?'image/webp':path.endsWith('.glb')?'model/gltf-binary':'text/javascript';
+    response.writeHead(200,{'content-type':type}).end(data);
   } catch {
     response.writeHead(404).end();
   }
@@ -48,60 +51,41 @@ const server = createServer(async (request,response) => {
 server.listen(0,'127.0.0.1');
 await once(server,'listening');
 const base='http://127.0.0.1:'+server.address().port;
-const output = stills ? await mkdtemp(join(tmpdir(),'zhi-film-stills-')) : new URL('../assets/',import.meta.url).pathname;
+const work=await mkdtemp(join(tmpdir(),'zhi-cutout-'));
 let browser;
-
-async function encode(page, name, duration) {
-  const destination = join(output,name+'.mp4');
-  const temporary = join(output,name+'.rendering.mp4');
-  const encoder=spawn('ffmpeg',[
-    '-hide_banner','-loglevel','error','-y','-f','image2pipe','-vcodec','mjpeg',
-    '-framerate',String(framesPerSecond),'-i','pipe:0','-an','-c:v','libx264',
-    '-preset','medium','-crf','21','-pix_fmt','yuv420p','-movflags','+faststart',temporary
-  ],{stdio:['pipe','ignore','inherit']});
-  const closed = once(encoder,'close');
-  encoder.stdin.on('error',error=>{if(error.code!=='EPIPE') console.error(error.message);});
-  try {
-    const total=Math.ceil(duration*framesPerSecond);
-    for(let frame=0;frame<total;frame++) {
-      const encoded=await page.evaluate(time=>window.captureFrame(time),frame/framesPerSecond);
-      if(encoder.exitCode!==null) throw new Error('FFmpeg closed before all frames were encoded.');
-      if(!encoder.stdin.write(Buffer.from(encoded,'base64'))) await once(encoder.stdin,'drain');
-    }
-    encoder.stdin.end();
-    const [code]=await closed;
-    if(code!==0) throw new Error('FFmpeg exited with code '+code);
-    await rename(temporary,destination);
-    console.log('Rendered '+destination);
-  } catch(error) {
-    encoder.kill();
-    await closed.catch(()=>{});
-    await rm(temporary,{force:true});
-    throw error;
-  }
-}
-
 try {
   browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
-  for(const {name,width,height} of formats) {
-    if (process.argv.includes('--portrait') && name !== 'intro-portrait') continue;
+  for (const {name,width,height} of formats) {
     const page=await browser.newPage();
-    page.on('pageerror', error=>console.error(error.message));
+    page.on('pageerror',error=>console.error(error.message));
     await page.goto(base+'/?width='+width+'&height='+height);
     await page.waitForFunction(()=>typeof window.captureFrame==='function',null,{timeout:30000});
-    if(stills) {
-      for(const time of [.72,1.78,2.73,3.57,4.85]) {
-        const encoded=await page.evaluate(time=>window.captureFrame(time),time);
-        await writeFile(join(output,name+'-'+time+'.jpg'),Buffer.from(encoded,'base64'));
-      }
+    const capture=async (time,path)=>{
+      const encoded=await page.evaluate(t=>window.captureFrame(t),time);
+      await writeFile(path,Buffer.from(encoded,'base64'));
+    };
+    if (stills) {
+      for (const time of [.6,1.28,2.42,3.8,4.6]) await capture(time,join(work,name+'-'+time+'.png'));
     } else {
       const duration=await page.evaluate(()=>window.filmDuration);
-      await encode(page,name,duration);
+      const frames=[];
+      for (let frame=0;frame<Math.ceil(duration*1000/frameMs);frame++) {
+        const path=join(work,name+'-'+String(frame).padStart(3,'0')+'.png');
+        await capture(frame*frameMs/1000,path);
+        frames.push(path);
+      }
+      const encoded=join(work,name+'.webp');
+      await run('img2webp',['-loop','1','-lossy','-q','79','-m','4','-d',String(frameMs),...frames,'-o',encoded]);
+      const transparent=join(work,name+'-alpha.webp');
+      await run('webpmux',['-set','bgcolor','0,0,0,0',encoded,'-o',transparent]);
+      await rename(transparent,new URL('../assets/'+name+'.webp',import.meta.url));
+      console.log('Rendered '+name+'.webp');
     }
     await page.close();
   }
-  if(stills) console.log(output);
+  if (stills) console.log(work);
 } finally {
   await browser?.close();
   await new Promise(resolve=>server.close(resolve));
+  if (!stills) await rm(work,{recursive:true,force:true});
 }

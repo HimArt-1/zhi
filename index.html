@@ -103,10 +103,10 @@
     </section>
     <section class="wrap section menu" id="menu" aria-labelledby="menu-title">
       <div class="section-head">
-        <div><p class="eyebrow"><i></i> من البار</p><h2 id="menu-title">وش تشرب؟</h2><p>قائمة للمعاينة، مبنية على اختيارات ريشيو.</p></div>
-        <label class="search"><svg class="icon"><use href="#search-icon"/></svg><span class="sr-only">ابحث في القائمة</span><input id="search" type="search" autocomplete="off" placeholder="ابحث في القائمة"></label>
+        <div><p class="eyebrow"><i></i> محاصيل زهي</p><h2 id="menu-title">وش قهوتك؟</h2><p>محاصيل قهوة مختصة من متجر زهي.</p></div>
+        <label class="search"><svg class="icon"><use href="#search-icon"/></svg><span class="sr-only">ابحث عن محصول</span><input id="search" type="search" autocomplete="off" placeholder="ابحث عن محصول"></label>
       </div>
-      <div id="filters" class="filters" aria-label="أقسام القائمة"></div>
+      <div id="filters" class="filters" aria-label="بلد المحصول"></div>
       <div id="products" class="products"></div>
       <p class="empty" id="empty-menu" role="status" hidden>ما لقينا نتيجة. جرّب كلمة أو قسم ثاني.</p>
     </section>
@@ -132,6 +132,7 @@
     <a href="#home" class="brand" aria-label="زهي، العودة للأعلى"><img src="assets/logo.webp" width="560" height="198" alt=""></a>
     <p>تصوّر مستقل لتجربة زهي، مبني على تطبيق ريشيو.</p>
     <div class="footer-links"><button id="activity-open" class="quiet-link" type="button">طلباتي وحجوزاتي</button><button id="intro-replay" class="quiet-link" type="button">شاهد الافتتاحية</button></div>
+    <p class="intro-credit">مجسّم البورش من <a href="https://sketchfab.com/3d-models/porsche-911-carrera-s-9912-e8e06ddd8d3f4419a5252d187f6f217e" lang="en">Mona x Supercars</a> بموجب <a href="https://creativecommons.org/licenses/by/4.0/" lang="en">CC BY 4.0</a></p>
   </div></footer>
   <dialog class="panel" id="product-dialog" aria-labelledby="product-title"><div id="product-detail"></div></dialog>
   <dialog class="panel panel-side" id="cart-dialog" aria-labelledby="cart-title">
@@ -160,7 +161,7 @@
   </dialog>
   <div class="toast" id="toast" role="status"></div>
   <dialog id="site-intro" class="entry-film" aria-label="افتتاحية زهي">
-    <video muted playsinline preload="none" aria-hidden="true"></video>
+    <img class="entry-film-art" alt="" aria-hidden="true">
     <div class="entry-film-controls">
       <span class="entry-film-index" dir="ltr" lang="en">ZHI / OPENING FILM</span>
       <button type="button" id="intro-skip" autofocus>تخطّي <svg class="icon" aria-hidden="true"><use href="#left"/></svg></button>

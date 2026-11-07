@@ -37,14 +37,16 @@ test('opening film plays once, can be skipped, and can be replayed', async t => 
   const page = await pageFor(t, { viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
   const opening = page.locator('#site-intro');
   await opening.waitFor();
-  await page.waitForFunction(() => document.querySelector('#site-intro video').currentTime > 0);
-  assert.equal(await opening.locator('video').getAttribute('src'), 'assets/intro.mp4');
+  assert.equal(await opening.locator('img').evaluate(img => img.naturalWidth), 960);
+  const firstSource = await opening.locator('img').getAttribute('src');
+  assert.match(firstSource, /^blob:/);
   await page.locator('#intro-skip').click();
   await opening.waitFor({ state: 'hidden' });
   await page.reload();
-  assert.equal(await opening.locator('video').getAttribute('src'), null);
+  assert.equal(await opening.locator('img').getAttribute('src'), null);
   await page.locator('#intro-replay').click();
   await opening.waitFor();
+  assert.notEqual(await opening.locator('img').getAttribute('src'), firstSource);
   await page.keyboard.press('Escape');
   await opening.waitFor({ state: 'hidden' });
 });
@@ -55,7 +57,7 @@ test('portrait opening finishes and returns access to the homepage', async t => 
   });
   const opening = page.locator('#site-intro');
   await opening.waitFor();
-  assert.equal(await opening.locator('video').getAttribute('src'), 'assets/intro-portrait.mp4');
+  assert.equal(await opening.locator('img').evaluate(img => img.naturalWidth), 432);
   await opening.waitFor({ state: 'hidden', timeout: 8500 });
   await page.locator('#next-stop').click();
   await page.locator('#poster[src$="tour-bar.webp"]').waitFor();
@@ -63,7 +65,7 @@ test('portrait opening finishes and returns access to the homepage', async t => 
 
 test('opens the branded 3D tour, moves the camera, and switches to the exterior', async t => {
   const page = await pageFor(t, { viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
-  assert.equal(await page.locator('#site-intro video').getAttribute('src'), null);
+  assert.equal(await page.locator('#site-intro img').getAttribute('src'), null);
   assert.match(await page.locator('#brand-logo').getAttribute('src'), /logo\.webp$/);
   await page.locator('#toggle-scene').click();
   await page.waitForSelector('#stage.is-live', { timeout: 15000 });
@@ -102,7 +104,7 @@ test('phone layout and photo stations work when WebGL is unavailable', async t =
 
 test('photo tour crossfades decoded station images and finishes on the latest selection', async t => {
   const page = await pageFor(t, { reducedMotion: 'no-preference' }, () => {
-    sessionStorage.setItem('zhi.opening-film.seen.v1', '1');
+    sessionStorage.setItem('zhi.opening-film.seen.v2', '1');
   });
   await page.locator('#next-stop').click();
   const bar = page.locator('#poster[src$="tour-bar.webp"]');
@@ -119,13 +121,31 @@ test('photo tour crossfades decoded station images and finishes on the latest se
   assert.equal(await page.locator('#stop-title').textContent(), 'الجلسات');
 });
 
-test('cart, order status, loyalty, and booking work locally without changing Ratio data', async t => {
-  const page = await pageFor(t, {}, () => localStorage.setItem('ratio-taif-prototype.flow.v2', 'original'));
-  await page.locator('#search').fill('cortado');
+test('official coffee cards support origin filters, search and storefront links', async t => {
+  const page = await pageFor(t);
+  assert.equal(await page.locator('#menu-title').textContent(), 'وش قهوتك؟');
+  assert.equal(await page.locator('.product').count(), 5);
+  await page.getByRole('button', { name: 'كولومبيا', exact: true }).click();
+  assert.equal(await page.locator('.product').count(), 3);
+  await page.locator('#search').fill('خوخ فاخر');
   assert.equal(await page.locator('.product').count(), 1);
-  await page.locator('.product-photo').click();
-  await page.locator('select[name="milk"]').selectOption('oat');
-  await page.getByRole('button', { name: 'أضف للسلة' }).click();
+  assert.match(await page.locator('.product-store-link').getAttribute('href'), /^https:\/\/zhi-coffee\.com\/.*\/p1768314619$/);
+  await page.locator('.product-photo img').scrollIntoViewIfNeeded();
+  assert.equal(await page.locator('.product-photo img').evaluate(async img => {
+    await img.decode();
+    return img.naturalWidth > 0;
+  }), true);
+});
+
+test('existing demo cart, order status, loyalty, and booking stay available', async t => {
+  const page = await pageFor(t, {}, () => {
+    localStorage.setItem('ratio-taif-prototype.flow.v2', 'original');
+    if (!localStorage.getItem('zhi-coffee.preview.orders.v1')) {
+      localStorage.setItem('zhi-coffee.preview.orders.v1', JSON.stringify({
+        version: 3, cart: [{ productId: 'esp-3', qty: 1, options: { milk: 'oat' } }]
+      }));
+    }
+  });
   await page.reload();
   assert.equal(await page.locator('#bag-count').textContent(), '1');
   await page.locator('#cart-open').click();
