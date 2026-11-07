@@ -205,7 +205,7 @@ $('show-seating').addEventListener('click', () => {
   $('toggle-scene').focus({ preventScroll: true });
 });
 function updateNav() {
-  const hash = ['#menu', '#story', '#visit'].includes(location.hash) ? location.hash : '#home';
+  const hash = ['#menu', '#visit'].includes(location.hash) ? location.hash : '#home';
   document.querySelectorAll('.masthead nav a[href^="#"]').forEach(a => {
     if (a.hash === hash) a.setAttribute('aria-current', 'location');
     else a.removeAttribute('aria-current');
