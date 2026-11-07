@@ -16,7 +16,7 @@
 
 ## الأصول
 
-صور الجولة مولّدة استنادًا إلى الصور المرجعية، ومجسّم السيارة مبني في `carrera.js` استنادًا إلى [مواصفات بورش](https://newsroom.porsche.com/en/products/porsche-911-carrera-new-2015-11366.html). تراخيص Three.js وخط Alexandria مرفقة.
+صور الجولة مولّدة استنادًا إلى الصور المرجعية. تُحمّل الجولة التفاعلية مجسّم البورش المرفق عند بدء العرض ثلاثي الأبعاد. تراخيص Three.js وخط Alexandria مرفقة.
 
 ## الافتتاحية
 
@@ -24,4 +24,4 @@
 
 لتصيير الافتتاحية من المصدر، ثبّت Chromium عبر Playwright وFFmpeg، ثم شغّل `node scripts/render-intro.mjs`. ينتج السكربت نسختي MP4 في `assets`.
 
-نموذج الافتتاحية [Porsche 911 Carrera S (991.2)](https://sketchfab.com/3d-models/porsche-911-carrera-s-9912-e8e06ddd8d3f4419a5252d187f6f217e) من Mona x Supercars بموجب [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). ملف GLB وأدوات قراءته مخصّصة للتصيير المحلي.
+نموذج الجولة والافتتاحية [Porsche 911 Carrera S (991.2)](https://sketchfab.com/3d-models/porsche-911-carrera-s-9912-e8e06ddd8d3f4419a5252d187f6f217e) من Mona x Supercars بموجب [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). عُدّل طلاء الهيكل إلى الزيتوني.

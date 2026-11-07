@@ -65,7 +65,15 @@ test('opens the branded 3D tour, moves the camera, and switches to the exterior'
   const page = await pageFor(t, { viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
   assert.equal(await page.locator('#site-intro video').getAttribute('src'), null);
   assert.match(await page.locator('#brand-logo').getAttribute('src'), /logo\.webp$/);
+  const modelFile = '/assets/porsche-911-carrera-s.glb';
+  assert.equal(await page.evaluate(file => performance.getEntriesByType('resource').some(entry => entry.name.endsWith(file)), modelFile), false);
+  const errors = [];
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  const model = page.waitForResponse(response => response.url().endsWith(modelFile));
   await page.locator('#toggle-scene').click();
+  assert.equal((await model).headers()['content-type'], 'model/gltf-binary');
   await page.waitForSelector('#stage.is-live', { timeout: 15000 });
   const canvas = page.locator('#scene canvas');
   const pin = page.locator('.marker[data-stop="0"]');
@@ -81,6 +89,7 @@ test('opens the branded 3D tour, moves the camera, and switches to the exterior'
   await page.locator('#toggle-scene').click();
   assert.equal(await page.locator('#stage.is-live').count(), 0);
   await page.locator('#poster[src$="tour-facade.webp"]').waitFor();
+  assert.deepEqual(errors, []);
 });
 
 test('phone layout and photo stations work when WebGL is unavailable', async t => {

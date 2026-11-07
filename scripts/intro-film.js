@@ -1,8 +1,7 @@
 import * as T from '../vendor/three.js';
-import { GLTFLoader } from './gltf-loader.js';
+import { loadCarrera } from '../carrera.js';
 
 const length = 5.4;
-const olive = 0x52583a;
 const smooth = (start, end, value) => T.MathUtils.smoothstep(value, start, end);
 const mix = T.MathUtils.lerp;
 const point = (x, y, z) => new T.Vector3(x, y, z);
@@ -124,29 +123,6 @@ function lighting(scene) {
   scene.add(fill);
 }
 
-function recolorBodyAtlas(map) {
-  const canvas=document.createElement('canvas');
-  canvas.width=map.image.width;
-  canvas.height=map.image.height;
-  const context=canvas.getContext('2d');
-  context.drawImage(map.image,0,0);
-  const image=context.getImageData(0,0,canvas.width,canvas.height);
-  const pixels=image.data;
-  // The upper paint islands are neutral. Lights, trim and other atlas regions stay intact.
-  const paintBytes=[(olive>>16)&255,(olive>>8)&255,olive&255];
-  for (let index=0;index<canvas.width*Math.floor(canvas.height*.59)*4;index+=4) {
-    const low=Math.min(pixels[index],pixels[index+1],pixels[index+2]);
-    const high=Math.max(pixels[index],pixels[index+1],pixels[index+2]);
-    if (low<125 || high-low>32 || pixels[index+3]<10) continue;
-    for (let channel=0;channel<3;channel++) pixels[index+channel]=paintBytes[channel]*high/255;
-  }
-  context.putImageData(image,0,0);
-  const tinted=new T.CanvasTexture(canvas);
-  tinted.flipY=map.flipY;
-  tinted.colorSpace=T.SRGBColorSpace;
-  return tinted;
-}
-
 function rollingWheels(mesh) {
   const positions = mesh.geometry.getAttribute('position');
   const normals = mesh.geometry.getAttribute('normal');
@@ -183,49 +159,6 @@ function rollingWheels(mesh) {
     positions.needsUpdate = true;
     normals.needsUpdate = true;
   };
-}
-
-async function loadCar() {
-  const source=await new GLTFLoader().loadAsync('/scripts/intro-model.glb');
-  const car=new T.Group();
-  const aligned=new T.Group();
-  aligned.add(source.scene);
-  car.add(aligned);
-  aligned.rotation.y=Math.PI;
-  const bounds=new T.Box3().setFromObject(aligned);
-  const center=bounds.getCenter(point(0,0,0));
-  const scale=4.50/bounds.getSize(point(0,0,0)).z;
-  aligned.scale.setScalar(scale);
-  aligned.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
-  let spinWheels;
-  source.scene.traverse(mesh=>{
-    if (!mesh.isMesh) return;
-    const material=mesh.material;
-    mesh.castShadow = /^Bonnetrefblend|^Mfghost.*whrear/.test(material.name);
-    if (/^Bonnetrefblend/.test(material.name)) {
-      mesh.material=new T.MeshPhysicalMaterial({
-        color:olive,metalness:.53,roughness:.24,clearcoat:1,
-        clearcoatRoughness:.16,envMapIntensity:1.03,side:T.DoubleSide
-      });
-    } else if (/^Bodyunref/.test(material.name)) {
-      material.map=recolorBodyAtlas(material.map);
-      material.envMapIntensity=.66;
-      material.depthWrite=false;
-    } else if (/^Glass/.test(material.name)) {
-      material.color.setHex(0x748077);
-      material.metalness=.17;
-      material.roughness=.22;
-      material.opacity=.73;
-      material.depthWrite=false;
-      mesh.renderOrder=3;
-    } else if (/^Mfghost.*whrear/.test(material.name)) {
-      spinWheels = rollingWheels(mesh);
-    } else if (/^Puncheff.*addlight/.test(material.name)) {
-      material.emissiveIntensity=.52;
-      material.depthWrite=false;
-    }
-  });
-  return {car, spinWheels};
 }
 
 function setShot(time, portrait, camera, aim, car, spinWheels) {
@@ -306,7 +239,11 @@ export async function createFilm(width,height,logo) {
   gallery(scene);
   lighting(scene);
 
-  const {car,spinWheels} = await loadCar();
+  const car=await loadCarrera();
+  let spinWheels;
+  car.traverse(mesh=>{
+    if(mesh.isMesh && /^Mfghost.*whrear/.test(mesh.material.name)) spinWheels=rollingWheels(mesh);
+  });
   scene.add(car);
   const lightMap = glowTexture();
   const lampSprites = [-.66,.66].map(x => {

@@ -3,12 +3,14 @@ import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const vercel = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+const policy = vercel.headers[0].headers.find(header => header.key === 'Content-Security-Policy').value;
 const root = new URL('../dist/', import.meta.url);
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.mp4': 'video/mp4', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8'
+  '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.mp4': 'video/mp4', '.glb': 'model/gltf-binary', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8'
 };
-const resourcePath = /^(?:[a-z0-9-]+\/)*[a-zA-Z0-9-]+\.(?:html|js|css|webp|ttf|txt|mp4)$/;
+const resourcePath = /^(?:[a-z0-9-]+\/)*[a-zA-Z0-9-]+\.(?:html|js|css|webp|ttf|txt|mp4|glb)$/;
 export function createPreviewServer() {
   return createServer(async (req, res) => {
     try {
@@ -31,7 +33,7 @@ export function createPreviewServer() {
         });
         return res.end(req.method === 'HEAD' ? undefined : data.subarray(start,end+1));
       }
-      res.writeHead(200, { 'Content-Type': types[extname(resource)], 'X-Content-Type-Options': 'nosniff' });
+      res.writeHead(200, { 'Content-Type': types[extname(resource)], 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': policy });
       res.end(req.method === 'HEAD' ? undefined : data);
     } catch {
       res.writeHead(404).end();

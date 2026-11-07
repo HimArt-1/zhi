@@ -1,6 +1,6 @@
 import * as T from './vendor/three.js';
 import { RoundedBoxGeometry } from './vendor/rounded-box.js';
-import { buildCarrera } from './carrera.js';
+import { loadCarrera } from './carrera.js';
 
 const V = (...values) => new T.Vector3(...values);
 const clamp = T.MathUtils.clamp;
@@ -373,11 +373,18 @@ function facade(g,m,carrera) {
     table(seating,0,0,m);director(seating,.63,-.06,-1.2,m);director(seating,-.55,-.10,1.25,m);
   }
   oliveTree(g,-1.92,-2.74,m,79,.95);oliveTree(g,7.22,-2.86,m,27,1.35);
-  placeCarrera(g,carrera,-.37,.025,1.49,-1.16,m.shade);
+  placeCarrera(g,carrera,-.37,-.024,1.49,-1.16,m.shade);
 }
 
-export function createTour(host,{initial,onLoss,onPins,brandImage}) {
+export async function createTour(host,{initial,onLoss,onPins,brandImage}) {
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+  let carrera;
+  try {
+    carrera=await loadCarrera({glassOpacity:.42});
+  } catch(error) {
+    renderer.dispose();
+    throw error;
+  }
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1,1.65));
   renderer.outputColorSpace=T.SRGBColorSpace;
   renderer.toneMapping=T.ACESFilmicToneMapping;
@@ -393,7 +400,6 @@ export function createTour(host,{initial,onLoss,onPins,brandImage}) {
   const camera=new T.PerspectiveCamera(40,1,.055,90);
   const m=makeMaterials(brandImage), inside=new T.Group(), outside=new T.Group();
   scene.add(inside,outside);outside.visible=false;
-  const carrera = buildCarrera();
   interior(inside,m,carrera);
   facade(outside,m,carrera);
 
@@ -534,7 +540,10 @@ export function createTour(host,{initial,onLoss,onPins,brandImage}) {
       const resources=new Set();
       for(const root of [scene,studio])root.traverse(obj=>{
         if(obj.geometry&&obj.geometry!==cube&&obj.geometry!==ball&&obj.geometry!==disc)resources.add(obj.geometry);
-        if(obj.material){resources.add(obj.material);if(obj.material.map)resources.add(obj.material.map);}
+        if(obj.material){
+          resources.add(obj.material);
+          for(const value of Object.values(obj.material))if(value?.isTexture)resources.add(value);
+        }
       });
       for(const res of resources)res.dispose();
       mirrorTarget.dispose();env.dispose();sun.shadow.dispose();renderer.dispose();

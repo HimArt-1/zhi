@@ -14,8 +14,8 @@ const formats = [
   {name:'intro-carrera-portrait',width:540,height:960}
 ];
 const sources = new Set([
-  'scripts/intro-film.js','scripts/gltf-loader.js','scripts/buffer-geometry-utils.js',
-  'scripts/intro-model.glb','vendor/three.js','assets/logo.webp'
+  'scripts/intro-film.js','carrera.js','vendor/gltf-loader.js','vendor/buffer-geometry-utils.js',
+  'assets/porsche-911-carrera-s.glb','vendor/three.js','assets/logo.webp'
 ]);
 const setup = `<!doctype html><meta charset="utf-8"><script type="module">
   import { createFilm } from '/scripts/intro-film.js';

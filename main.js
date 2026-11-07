@@ -143,7 +143,7 @@ async function startScene() {
   try {
     if (!viewer) {
       const [{ createTour }] = await Promise.all([import('./scene.js'), $('brand-logo').decode()]);
-      viewer = createTour($('scene'), {
+      viewer = await createTour($('scene'), {
         initial: current,
         brandImage: $('brand-logo'),
         onPins: points => points.forEach((point, index) => {
